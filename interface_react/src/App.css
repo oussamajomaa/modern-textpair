@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+body,h1,h2,h3,p,ul,li,a {
+	margin: 0;
+	padding: 0;
+	font-family: "Noto Sans", sans-serif;
+}
+
+.container {
+	padding: 1rem;
+
+}
+
+.container button {
+	padding: 10px;
+	border: 1px solid black;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.css-o1u8iu-content-text {
+	background-color: #fff !important;
+}
+
+.css-hf3w1f-word-removed {
+	text-decoration: line-through !important;
+	background-color: #fff !important;
+
+}
+
+
+/* Style the back side */
+
+.css-1n5o7vh-diff-container {
+	display: none;
+}
+
+.btnHide, .save-comment {
+	display: none;
+}
+
+.css-1ks9aww-gutter {
+	display: none;
+}
+
+.css-17vezug-marker {
+	display: none;
+}
+
+/* right */
+.css-1u4zuq6-word-added {
+	color: blue;
+	background-color: #fff !important;
+}
+
+.css-vl0irh-content,
+.css-rq9a2a-diff-removed {
+	background-color: #fff !;
+}
+
+td {
+	background-color: #fff !important;
+}
+
+.view-all,.view-diff {
+	display: flex;
+	align-items: stretch;
+	padding: 1rem;
+}
+
+.view-all p, .view-diff p {
+	margin: 5px;
+	line-height: 2;
+}
+
+.view-diff {
+	display: none;
+	background-color: #fff !important;
+}
+
+
+
+.radio-btn {
+	display: flex;
+
+	gap: 1rem;
+	border: 1px solid rgb(228, 228, 228);
+	padding: 10px;
+	border-radius: 5px;
+	box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+
+
+
+pre,
+span {
+	padding-bottom: 0 !important;
+	padding-top: 0 !important;
+}
+
+.label-radio {
+	display: flex;
+	gap: 5px;
+}
+
+.label-radio label {
+	cursor: pointer;
+}
+
+
+.alignement {
+	color: green;
+
+}
+
+
+
+.author {
+	display: flex;
+	gap: 10px;
+}
+
+
+.author span {
+	color: brown;
+	font-style: italic;
+}
+
+.active {
+	/* border-bottom: 2px solid; */
+	color:#ffbb28;
+}
+
+.css-cncyp1-word-diff ,.css-hf3w1f-word-removed {
+	display: inline !important;
+}
+
+.pagination {
+	display: flex;
+	list-style: none;
+	padding: 0;
+	width: 100px;
+	align-items: center;
+	justify-content: center;
+	border-radius: 5px;
+  }
+  
+  .pagination li {
+	margin: 0 5px;
+  }
+  
+  .pagination li a {
+	text-decoration: none;
+	color: white;
+	
+  }
+  
+  .pagination li.active a {
+	font-weight: bold;
+	color: red;
+	width: 50px;
+  }
+  
+  .pagination li.previous, .pagination li.next{
+	padding: 7px;
+	background: black;
+	border-radius: 5px;
+	color: white;
+
+  }
+  
+  .pagination li a[aria-label="Page 2"] {
+	display: none !important;
+}
+  .diff{
+	display: inline;
+	color: green;
+  }
+  /* .css-cncyp1-word-diff::after, .css-hf3w1f-word-removed::after, .css-1u4zuq6-word-added::after {
+	content: '' !important; 
+  } */
+   
+@media screen and (max-width: 800px) {
+
+
+	.div-par-left {
+		border-right: none;
+	}
+
+	.div-btn-radio {
+		flex-direction: column;
+	}
+
+
+
+}

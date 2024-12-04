@@ -1,0 +1,37 @@
+
+###> symfony/framework-bundle ###
+/api_symfony/.env.local
+/api_symfony/.env.local.php
+/api_symfony/.env.*.local
+/api_symfony/config/secrets/prod/prod.decrypt.private.php
+/api_symfony/public/bundles/
+/api_symfony/var/
+/api_symfony/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/api_symfony/phpunit.xml
+api_symfony/.phpunit.result.cache
+###< phpunit/phpunit ###
+
+###> symfony/phpunit-bridge ###
+api_symfony/.phpunit.result.cache
+/api_symfony/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+###> symfony/asset-mapper ###
+/api_symfony/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
+###> lexik/jwt-authentication-bundle ###
+/api_symfony/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###
+
+
+
+### interface 
+# dependencies
+/interface_react/node_modules/
+/interface_react/build/
+/interface_react/.env
