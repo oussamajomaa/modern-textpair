@@ -26,6 +26,7 @@ export default function Rapport() {
         })
         if (response.ok) {
             const data = await response.json()
+            
             animateCounter(data.evaluated, data.validated, data.alignment, data.sourceAuthor, data.targetAuthor)
         }
         setIsLoading(false)
@@ -43,61 +44,124 @@ export default function Rapport() {
     }, []);
 
     // Fonction générique pour récupérer les données par lot et les exporter en CSV
+    // const fetchDataInBatches = async (endpoint, fileName) => {
+    //     setIsLoading(true);
+    //     setCountDownloded(0)
+    //     let lastId = 0;
+    //     const limit = 1000;  // Nombre de lignes à récupérer par lot
+    //     let allData = [];
+    //     let batchCount = 0;
+    //     let filePart = 1;    // Numéro de fichier
+    //     const maxRecordsPerFile = 10000;  // Maximum d'enregistrements par fichier
+
+    //     // Créer un nouvel AbortController pour cette série de requêtes
+    //     abortControllerRef.current = new AbortController();
+    //     const controller = abortControllerRef.current;
+
+    //     try {
+    //         while (true) {
+    //             batchCount++;
+    //             const response = await fetch(`${ENDPOINT}${endpoint}`, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //                 body: JSON.stringify({ limit, lastId }),  // Envoyer lastId au backend
+    //                 signal: controller.signal,  // Associer le signal à la requête
+    //                 credentials: 'include'
+    //             });
+
+    //             if (response.ok) {
+    //                 const data = await response.json();
+    //                 setCountDownloded((prevCount) => prevCount + data.length)
+    //                 setIsDownloaded(true)
+    //                 // Ajouter les données récupérées à allData
+    //                 allData = allData.concat(data);
+
+    //                 // Si le nombre d'enregistrements récupérés est inférieur à la limite, arrêter la boucle
+    //                 if (data.length < limit) {
+    //                     // Exporter le dernier lot si des enregistrements restent
+    //                     if (allData.length > 0) {
+    //                         const currentFileName = `${fileName}_part${filePart}.csv`;
+    //                         downloadCSV(allData, currentFileName);  // Exporter le fichier
+    //                         filePart++;  // Incrémenter le numéro du fichier
+    //                     }
+    //                     break;
+    //                 }
+
+    //                 // Définir lastId comme l'ID du dernier élément du lot actuel
+    //                 lastId = data[data.length - 1].id;
+
+    //                 // Si le nombre total d'enregistrements dépasse 10 000, exporter et réinitialiser allData
+    //                 if (allData.length >= maxRecordsPerFile) {
+    //                     const currentFileName = `${fileName}_part${filePart}.csv`;
+    //                     downloadCSV(allData.slice(0, maxRecordsPerFile), currentFileName);  // Exporter le fichier
+    //                     filePart++;  // Incrémenter le numéro du fichier
+
+    //                     // Réinitialiser allData avec les enregistrements restants (s'il y en a plus de 10 000)
+    //                     allData = allData.slice(maxRecordsPerFile);
+    //                 }
+    //             } else {
+    //                 console.error("Erreur lors de la récupération des données.");
+    //                 break;
+    //             }
+    //         }
+    //     } catch (err) {
+    //         if (err.name === 'AbortError') {
+    //             console.log('Le téléchargement des données a été interrompu.');
+    //         } else {
+    //             console.error('Erreur inconnue lors du téléchargement des données.', err);
+    //         }
+    //     } finally {
+    //         setIsLoading(false);
+    //         setIsDownloaded(false)
+    //     }
+    // };
     const fetchDataInBatches = async (endpoint, fileName) => {
         setIsLoading(true);
-        setCountDownloded(0)
+        setCountDownloded(0);
         let lastId = 0;
         const limit = 1000;  // Nombre de lignes à récupérer par lot
         let allData = [];
-        let batchCount = 0;
-        let filePart = 1;    // Numéro de fichier
-        const maxRecordsPerFile = 10000;  // Maximum d'enregistrements par fichier
-
-        // Créer un nouvel AbortController pour cette série de requêtes
+        let filePart = 1;
+        const maxRecordsPerFile = 10000;
+    
+        // Création d'un nouvel AbortController pour pouvoir annuler la requête si nécessaire
         abortControllerRef.current = new AbortController();
         const controller = abortControllerRef.current;
-
+    
         try {
             while (true) {
-                batchCount++;
                 const response = await fetch(`${ENDPOINT}${endpoint}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ limit, lastId }),  // Envoyer lastId au backend
-                    signal: controller.signal,  // Associer le signal à la requête
+                    body: JSON.stringify({ limit, lastId }),  
+                    signal: controller.signal,  
                     credentials: 'include'
                 });
-
+    
                 if (response.ok) {
                     const data = await response.json();
-                    setCountDownloded((prevCount) => prevCount + data.length)
-                    setIsDownloaded(true)
-                    // Ajouter les données récupérées à allData
-                    allData = allData.concat(data);
-
-                    // Si le nombre d'enregistrements récupérés est inférieur à la limite, arrêter la boucle
-                    if (data.length < limit) {
-                        // Exporter le dernier lot si des enregistrements restent
-                        if (allData.length > 0) {
-                            const currentFileName = `${fileName}_part${filePart}.csv`;
-                            downloadCSV(allData, currentFileName);  // Exporter le fichier
-                            filePart++;  // Incrémenter le numéro du fichier
-                        }
-                        break;
+                    setCountDownloded((prevCount) => prevCount + data.length);
+                    setIsDownloaded(true);
+    
+                    // Vérifier si on a reçu des données
+                    if (data.length === 0) {
+                        break;  // Sortir de la boucle si aucune donnée n'est retournée
                     }
-
-                    // Définir lastId comme l'ID du dernier élément du lot actuel
-                    lastId = data[data.length - 1].id;
-
-                    // Si le nombre total d'enregistrements dépasse 10 000, exporter et réinitialiser allData
+    
+                    allData = allData.concat(data);
+    
+                    // Définir lastId uniquement si on a récupéré des données
+                    lastId = data[data.length - 1].ID;
+    
+                    // Si le nombre total d'enregistrements dépasse 10 000, exporter un fichier et réinitialiser allData
                     if (allData.length >= maxRecordsPerFile) {
                         const currentFileName = `${fileName}_part${filePart}.csv`;
-                        downloadCSV(allData.slice(0, maxRecordsPerFile), currentFileName);  // Exporter le fichier
-                        filePart++;  // Incrémenter le numéro du fichier
-
-                        // Réinitialiser allData avec les enregistrements restants (s'il y en a plus de 10 000)
+                        downloadCSV(allData.slice(0, maxRecordsPerFile), currentFileName);
+                        filePart++;
                         allData = allData.slice(maxRecordsPerFile);
                     }
                 } else {
@@ -105,6 +169,13 @@ export default function Rapport() {
                     break;
                 }
             }
+    
+            // Exporter les enregistrements restants après la boucle
+            if (allData.length > 0) {
+                const currentFileName = `${fileName}_part${filePart}.csv`;
+                downloadCSV(allData, currentFileName);
+            }
+    
         } catch (err) {
             if (err.name === 'AbortError') {
                 console.log('Le téléchargement des données a été interrompu.');
@@ -113,18 +184,25 @@ export default function Rapport() {
             }
         } finally {
             setIsLoading(false);
-            setIsDownloaded(false)
+            setIsDownloaded(false);
         }
     };
 
-
-    const getEvaluatedInBatches = () => {
-        fetchDataInBatches('/admin/rapport/evaluated', 'evaluated.csv');
+    const getEvaluatedInBatches = async() => {
+        // fetchDataInBatches('/admin/rapport/evaluated', 'evaluated.csv');
+        setIsLoading(true)
+        // fetchDataInBatches('/admin/rapport/author_source', 'source_author.csv');
+        const response = await fetch(`${ENDPOINT}/admin/rapport/evaluated`, {
+            credentials: 'include'
+        })
+        const data = await response.json()
+        setIsLoading(false)
+        downloadCSV(data, 'evaluated.csv')
     };
 
-    const getValidatedInBatches = () => {
-        fetchDataInBatches('/admin/rapport/validated', 'validated.csv');
-    };
+    // const getValidatedInBatches = () => {
+    //     fetchDataInBatches('/admin/rapport/validated', 'validated.csv');
+    // };
 
     const getAlignmentInBatches = () => {
         fetchDataInBatches('/admin/rapport/alignment', 'alignment.csv');

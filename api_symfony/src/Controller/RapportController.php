@@ -37,20 +37,18 @@ class RapportController extends AbstractController
         $data = json_decode($request->getContent());
         // Récupérer les paramètres limit et lastId depuis le corps de la requête
         // Met à jour pour utiliser lastId au lieu de offset
-        $limit = $data->limit;  // Nombre d'enregistrements à récupérer
+        // $limit = $data->limit;  // Nombre d'enregistrements à récupérer
         $lastId = $data->lastId ?? 0;  // Utiliser 0 si lastId n'est pas défini
         $sqlEvaluated = "SELECT evaluation.id as ID, source_author, source_title, source_content, target_author, target_title, target_content
                         FROM evaluation
                         JOIN alignment ON alignment.id = evaluation.alignment_id
-                        JOIN user on user.id = evaluation.user_id
-                        WHERE evaluation.id > :lastId
-                        ORDER BY evaluation.id ASC
-                        lIMIT :limit";
+                        ORDER BY evaluation.id ASC";
+        //  -- lIMIT :limit";
 
         // Préparer la requête avec Doctrine DBAL
         $stmt = $connection->prepare($sqlEvaluated);
-        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue('lastId', $lastId, \PDO::PARAM_INT);
+        // $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+        // $stmt->bindValue('lastId', $lastId, \PDO::PARAM_INT);
 
         // Exécuter la requête et récupérer les résultats
         $result = $stmt->executeQuery();
@@ -59,49 +57,49 @@ class RapportController extends AbstractController
         return new JsonResponse($evaluated);
     }
 
-    #[Route('/api/admin/rapport/validated', name: 'app_rapport_validated')]
-    public function validated(Connection $connection, Request $request): JsonResponse
-    {
-        // Accéder au cookie
-        $token = $request->cookies->get('token');
+    // #[Route('/api/admin/rapport/validated', name: 'app_rapport_validated')]
+    // public function validated(Connection $connection, Request $request): JsonResponse
+    // {
+    //     // Accéder au cookie
+    //     $token = $request->cookies->get('token');
 
-        if (!$token) {
-            return new JsonResponse(['error' => 'Token not found'], 401);
-        }
+    //     if (!$token) {
+    //         return new JsonResponse(['error' => 'Token not found'], 401);
+    //     }
 
-        // Décoder le token pour obtenir l'utilisateur connecté
-        try {
-            $secretKey = $_ENV['JWT_SECRET'];
-            $decodedToken = JWT::decode($token, new Key($secretKey, 'HS256'));
-            $userId = $decodedToken->sub; // Assurez-vous que le token contient un champ 'sub' avec l'ID utilisateur
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Invalid token'], 401);
-        }
+    //     // Décoder le token pour obtenir l'utilisateur connecté
+    //     try {
+    //         $secretKey = $_ENV['JWT_SECRET'];
+    //         $decodedToken = JWT::decode($token, new Key($secretKey, 'HS256'));
+    //         $userId = $decodedToken->sub; // Assurez-vous que le token contient un champ 'sub' avec l'ID utilisateur
+    //     } catch (\Exception $e) {
+    //         return new JsonResponse(['error' => 'Invalid token'], 401);
+    //     }
 
-        $data = json_decode($request->getContent());
-        // Récupérer les paramètres limit et lastId depuis le corps de la requête
-        // Met à jour pour utiliser lastId au lieu de offset
-        $limit = $data->limit;  // Nombre d'enregistrements à récupérer
-        $lastId = $data->lastId ?? 0;  // Utiliser 0 si lastId n'est pas défini
-        $sqlValidated = "SELECT evaluation.id as ID, source_author, source_title, source_content, target_author, target_title, target_content  
-                        FROM evaluation
-                        JOIN alignment ON alignment.id = evaluation.alignment_id
-                        JOIN user on user.id = evaluation.user_id
-                        WHERE validate = 1 AND evaluation.id > :lastId
-                        ORDER BY evaluation.id ASC
-                        lIMIT :limit";
+    //     $data = json_decode($request->getContent());
+    //     // Récupérer les paramètres limit et lastId depuis le corps de la requête
+    //     // Met à jour pour utiliser lastId au lieu de offset
+    //     $limit = $data->limit;  // Nombre d'enregistrements à récupérer
+    //     $lastId = $data->lastId ?? 0;  // Utiliser 0 si lastId n'est pas défini
+    //     $sqlValidated = "SELECT evaluation.id as ID, source_author, source_title, source_content, target_author, target_title, target_content  
+    //                     FROM evaluation
+    //                     JOIN alignment ON alignment.id = evaluation.alignment_id
+    //                     JOIN user on user.id = evaluation.user_id
+    //                     WHERE validate = 1 AND evaluation.id > :lastId
+    //                     ORDER BY evaluation.id ASC
+    //                     lIMIT :limit";
 
-        // Préparer la requête avec Doctrine DBAL
-        $stmt = $connection->prepare($sqlValidated);
-        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue('lastId', $lastId, \PDO::PARAM_INT);
+    //     // Préparer la requête avec Doctrine DBAL
+    //     $stmt = $connection->prepare($sqlValidated);
+    //     $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+    //     $stmt->bindValue('lastId', $lastId, \PDO::PARAM_INT);
 
-        // Exécuter la requête et récupérer les résultats
-        $result = $stmt->executeQuery();
+    //     // Exécuter la requête et récupérer les résultats
+    //     $result = $stmt->executeQuery();
 
-        $validated = $result->fetchAllAssociative();
-        return new JsonResponse($validated);
-    }
+    //     $validated = $result->fetchAllAssociative();
+    //     return new JsonResponse($validated);
+    // }
 
     #[Route('/api/admin/rapport/alignment', name: 'app_rapport_alignment', methods: ['POST'])]
     public function alignment(Connection $connection, Request $request): JsonResponse
@@ -151,7 +149,7 @@ class RapportController extends AbstractController
     }
 
     #[Route('/api/admin/rapport/count', name: 'app_rapport_count')]
-    public function count(EvaluationRepository $repo, AlignmentRepository $repoAlign, Request $request): JsonResponse
+    public function count(EvaluationRepository $repo, AlignmentRepository $repoAlign, Request $request, Connection $connection): JsonResponse
     {
         // Accéder au cookie
         $token = $request->cookies->get('token');
@@ -169,15 +167,20 @@ class RapportController extends AbstractController
             return new JsonResponse(['error' => 'Invalid token'], 401);
         }
 
-        $countEvaluated = $repo->count();
-        $countValidated = $repo->count(['validate' => 1]);
+        $sql = "SELECT COUNT(*) AS total FROM evaluation 
+        JOIN alignment ON alignment.id = evaluation.alignment_id";
+
+        $stmt = $connection->prepare($sql);
+        $result = $stmt->executeQuery()->fetchAssociative();
+
+        $countEvaluated = $result['total'];
+        // $countValidated = $repo->count(['validate' => 1]);
         $countAlignment = $repoAlign->count();
         $sourceAuthor = $repoAlign->countBySourceAuthor();
         $targetAuthor = $repoAlign->countByTargetAuthor();
         return new JsonResponse(
             [
                 'evaluated' => $countEvaluated,
-                'validated' => $countValidated,
                 'alignment' => $countAlignment,
                 'sourceAuthor' => count($sourceAuthor),
                 'targetAuthor' => count($targetAuthor)
@@ -233,7 +236,7 @@ class RapportController extends AbstractController
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Invalid token'], 401);
         }
-        
+
         // Requête SQL pour récupérer les auteurs distincts
         $sqlAuthor = "SELECT DISTINCT target_author as Auteur
                   FROM alignment
